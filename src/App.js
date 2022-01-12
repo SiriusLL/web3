@@ -1,11 +1,9 @@
 import "./App.css";
-import mintExampleAbi from "./mintExamleAbi.json";
-import {ethers, BigNumber} from "ethers";
-import {useEffect, useState} from "react";
+import mintExampleAbi from "./mintExampleAbi.json";
+import { ethers, BigNumber } from "ethers";
+import { useEffect, useState } from "react";
 
-mintExampleAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
-const
+const mintExampleAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 function App() {
   // connecting
@@ -14,7 +12,7 @@ function App() {
   async function connectAccounts() {
     if (window.ethereum) {
       const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts"
+        method: "eth_requestAccounts",
       });
       setAccounts(accounts);
     }
@@ -24,8 +22,42 @@ function App() {
     connectAccounts();
   }, []);
 
-  
-  return <div className="App"></div>;
+  //Minting
+  const [mintAmount, setMintAmount] = useState(1);
+
+  async function handleMint() {
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        mintExampleAddress,
+        mintExampleAbi.abi,
+        signer
+      );
+      try {
+        const response = await contract.mint(BigNumber.from(mintAmount));
+        console.log("response: ", response);
+      } catch (err) {
+        console.log("Error: ", err);
+      }
+    }
+  }
+
+  return (
+    <div className="App">
+      The Mint button
+      {accounts.length && (
+        <div>
+          <button onClick={() => setMintAmount(mintAmount - 1)}>-</button>
+          {mintAmount}
+          <button onClick={() => setMintAmount(mintAmount + 1)}>+</button>
+          <button onClick={handleMint}>Mint</button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default App;
+
+//https://www.youtube.com/watch?v=JBudoefuKBk
